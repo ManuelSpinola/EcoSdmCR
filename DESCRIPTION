@@ -1,0 +1,34 @@
+Package: EcoSDMCR
+Title: Species Distribution Modeling for Costa Rica
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Manuel",
+           family = "Spinola",
+           role = c("aut", "cre"),
+           email = "manuel.spinola@una.ac.cr")
+Description: Interactive Shiny application for species distribution modeling
+    using hexagonal H3 spatial grids and CHELSA bioclimatic variables.
+    Built on the h3sdm package. ICOMVIS, Universidad Nacional, Costa Rica.
+License: MIT + file LICENSE
+Imports:
+    shiny,
+    bslib,
+    bsicons,
+    shinyjs,
+    leaflet,
+    leafgl,
+    sf,
+    dplyr,
+    h3sdm,
+    parsnip,
+    recipes,
+    workflows,
+    yardstick,
+    rsample,
+    spatialsample,
+    mgcv,
+    ranger,
+    rbiodatacr
+Remotes:
+    ManuelSpinola/h3sdm
+Encoding: UTF-8
