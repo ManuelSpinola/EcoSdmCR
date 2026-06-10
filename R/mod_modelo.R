@@ -85,7 +85,43 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
         return()
       }
 
-      # 3. Preparar datos para h3sdm
+      # 3. Filtro de outliers ambientales (Mahalanobis en espacio CHELSA)
+      setProgress(0.25, detail = "Filtrando outliers ambientales…")
+      vars_cov <- setdiff(
+        names(sf::st_drop_geometry(pa)),
+        c("h3_address", "presence", "x", "y", "geom")
+      )
+      vars_cov <- vars_cov[sapply(
+        sf::st_drop_geometry(pa)[, vars_cov, drop = FALSE], is.numeric
+      )]
+
+      filtro <- filtrar_outliers_ambientales(pa, vars_cov)
+      pa     <- filtro$pa_limpio
+
+      n_pres_post <- sum(pa$presence == "1", na.rm = TRUE)
+
+      if (filtro$n_eliminados > 0) {
+        showNotification(
+          paste0(
+            "\u26a0\ufe0f ", filtro$n_eliminados,
+            " registro(s) eliminado(s) como outlier(s) ambiental(es) ",
+            "(D\u00b2 > ", round(filtro$umbral, 1), "). ",
+            "Se usaron ", n_pres_post, " presencias para el modelo."
+          ),
+          type = "warning", duration = 8
+        )
+      }
+
+      if (n_pres_post < 5) {
+        showNotification(
+          paste0("Tras el filtro ambiental quedaron solo ", n_pres_post,
+                 " presencias — no es posible ajustar el modelo. ",
+                 "Intentá con una especie con más registros."),
+          type = "error", duration = 10)
+        return()
+      }
+
+      # 4. Preparar datos para h3sdm
       setProgress(0.3, detail = "Construyendo dataset de modelado…")
       cov_dedup <- cov_actual[!duplicated(cov_actual$h3_address), ]
       pred_sf   <- h3sdm::h3sdm_predictors(cov_dedup)
@@ -95,7 +131,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
 
       presence_data <- dat |> dplyr::filter(presence == "1")
 
-      # 4. Recipe
+      # 5. Recipe
       setProgress(0.4, detail = paste("Configurando", toupper(alg), "…"))
       if (alg == "gam") {
         rec <- h3sdm::h3sdm_recipe_gam(dat, response_col = "presence")
