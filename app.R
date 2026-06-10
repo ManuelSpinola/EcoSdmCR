@@ -122,36 +122,60 @@ ui <- page_navbar(
           card_header(bs_icon("hexagon-fill", class = "me-1"),
                       "Motor: h3sdm"),
           card_body(
-            p("Modelado de distribución de especies basado en grillas
-               hexagonales H3. Las covariables CHELSA están pre-procesadas
-               por hexágono para resoluciones 6, 7 y 8."),
+            p("Modelado de distribuci\u00f3n de especies basado en grillas
+               hexagonales H3. Las covariables CHELSA est\u00e1n pre-procesadas
+               por hex\u00e1gono para resoluciones 6, 7 y 8."),
             p("Datos de ocurrencia: ",
               strong("GBIF, iNaturalist, BiodataCR"), "."),
-            p("Modelo: ", strong("Random Forest"), ".")
+            p("Modelo: ", strong("GAM espacial"),
+              " (Modelo Aditivo Generalizado con estructura espacial)."),
+            p("Los \u00edndices espaciales H3 permiten explorar patrones a
+               m\u00faltiples resoluciones \u2014 de paisaje a microh\u00e1bitat \u2014 con
+               celdas de \u00e1rea uniforme."),
+            p("Proyecci\u00f3n futura bajo escenario de cambio clim\u00e1tico ",
+              strong("SSP5-8.5"), " usando variables CHELSA.")
           )
         ),
 
         card(
-          card_header(bs_icon("shield-check", class = "me-1"),
-                      "Área de Aplicabilidad (AOA)"),
+          card_header(bs_icon("funnel", class = "me-1"),
+                      "Filtro de outliers ambientales"),
           card_body(
-            p("El AOA delimita la región donde el modelo puede predecir
-               con confianza, basándose en la similitud ambiental con los
-               datos de entrenamiento."),
-            p("Se muestran 4 mapas: AOA binario, Índice de Disimilaridad,
-               e idoneidad continua y categórica dentro del AOA.")
+            p("Antes del modelado, los registros de presencia se filtran
+               autom\u00e1ticamente usando la ",
+              strong("distancia de Mahalanobis"), " en espacio ambiental."),
+            p("Los registros con D^2 superior al percentil 97.5 de la
+               distribuci\u00f3n chi-cuadrado se excluyen del entrenamiento,
+               eliminando observaciones ecol\u00f3gicamente incoherentes
+               (p.ej. especies de altura con registros en tierras bajas)."),
+            p("Las pseudoausencias no son afectadas por este filtro.")
           )
         )
       ),
 
       card(
-        card_header(bs_icon("person", class = "me-1"), "Créditos"),
+        card_header(bs_icon("shield-check", class = "me-1"),
+                    "\u00c1rea de Aplicabilidad (AOA)"),
         card_body(
-          p(strong("Manuel Spínola"),
-            " — ICOMVIS, Universidad Nacional de Costa Rica"),
-          p("App desarrollada con ",
+          p("El AOA delimita la regi\u00f3n donde el modelo puede predecir
+             con confianza, bas\u00e1ndose en la similitud ambiental con los
+             datos de entrenamiento."),
+          p("Se muestran 4 mapas: AOA binario, \u00cdndice de Disimilaridad,
+             e idoneidad continua y categ\u00f3rica dentro del AOA.")
+        )
+      ),
+
+      card(
+        card_header(bs_icon("person", class = "me-1"), "Cr\u00e9ditos"),
+        card_body(
+          p(strong("Manuel Sp\u00ednola"),
+            " \u2014 ICOMVIS, Universidad Nacional de Costa Rica"),
+          p("App desarrollada con asistencia de ",
+            tags$a("Claude (Anthropic)",
+                   href = "https://www.anthropic.com",
+                   target = "_blank"), " y con ",
             tags$a("h3sdm",
-                   href = "https://github.com/mspinola/h3sdm",
+                   href = "https://github.com/ManuelSpinola/h3sdm",
                    target = "_blank"), ", ",
             tags$a("Shiny",
                    href = "https://shiny.posit.co",
@@ -170,7 +194,7 @@ ui <- page_navbar(
   nav_spacer(),
   nav_item(
     tags$a(
-      href = "https://icomvis.una.ac.cr", target = "_blank",
+      href = "https://www.icomvis.una.ac.cr/", target = "_blank",
       class = "nav-link",
       bs_icon("house"), " ICOMVIS"
     )
