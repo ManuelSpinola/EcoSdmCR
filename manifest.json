@@ -2728,18 +2728,18 @@
         "Config/roxygen2/version": "8.0.0",
         "Author": "Manuel Spínola [aut, cre]",
         "Maintainer": "Manuel Spínola <mspinola10@gmail.com>",
-        "Built": "R 4.6.0; ; 2026-06-08 11:31:20 UTC; unix",
+        "Built": "R 4.6.0; ; 2026-06-10 16:16:44 UTC; unix",
         "RemoteType": "github",
-        "RemoteHost": "api.github.com",
         "RemoteUsername": "ManuelSpinola",
         "RemoteRepo": "h3sdm",
         "RemoteRef": "main",
-        "RemoteSha": "452a415bc57e819fcee394bf2782964102c0e6a6",
+        "RemoteSha": "73284c4ff1fbe5bb7f0e0cb07f6a28727f242d54",
+        "RemoteHost": "api.github.com",
         "GithubHost": "api.github.com",
         "GithubRepo": "h3sdm",
         "GithubUsername": "ManuelSpinola",
         "GithubRef": "main",
-        "GithubSHA1": "452a415bc57e819fcee394bf2782964102c0e6a6"
+        "GithubSHA1": "73284c4ff1fbe5bb7f0e0cb07f6a28727f242d54"
       }
     },
     "hardhat": {
@@ -7094,7 +7094,7 @@
       "checksum": "ecb1f6047d538124f06862b8e7dbfca5"
     },
     ".Rprofile": {
-      "checksum": "7351748071ddf7a4baa8f6ed219a4b0f"
+      "checksum": "b5d3bb269d5dc3f27515dc9655c67c1b"
     },
     "app.R": {
       "checksum": "5511c01de28f915ebe59376b3daba10d"
@@ -7117,9 +7117,6 @@
     "data/bio_chelsa_presente_no_cor_cr_5367_h8.gpkg": {
       "checksum": "aea97b377da72839eee441a2f8a87dd8"
     },
-    "DESCRIPTION.bak": {
-      "checksum": "8edde3f6637e9f52cef26ba773b52060"
-    },
     "R/helpers.R": {
       "checksum": "8cd0b2aca6459cd6cfaa67c22fb7ba07"
     },
@@ -7130,7 +7127,7 @@
       "checksum": "98a114253d769a65caa5b8103fbe2ffc"
     },
     "R/mod_modelo.R": {
-      "checksum": "5b49bb5e1fc61d502e9a828344f6a42e"
+      "checksum": "0f41e5d47f5aec1f143e72e18c5ec45a"
     },
     "R/mod_registros.R": {
       "checksum": "1fba3275f311e1e2924c62a422586bf0"
@@ -7145,7 +7142,7 @@
       "checksum": "735d0811755a246644acaa789f7b643f"
     },
     "renv.lock": {
-      "checksum": "06b619fda3ce88a1c42f71f34b51c503"
+      "checksum": "42bdecaf5626e9616d4cb895f45a4a59"
     },
     "www/logo_ICOMVIS_circular.png": {
       "checksum": "cb87bb09fb936f9b62bd4ea5b91d63e7"
