@@ -3042,11 +3042,11 @@
       "Author": "Manuel Spínola [aut, cre]",
       "Maintainer": "Manuel Spínola <mspinola10@gmail.com>",
       "RemoteType": "github",
-      "RemoteHost": "api.github.com",
       "RemoteUsername": "ManuelSpinola",
       "RemoteRepo": "h3sdm",
       "RemoteRef": "main",
-      "RemoteSha": "452a415bc57e819fcee394bf2782964102c0e6a6"
+      "RemoteSha": "73284c4ff1fbe5bb7f0e0cb07f6a28727f242d54",
+      "RemoteHost": "api.github.com"
     },
     "hardhat": {
       "Package": "hardhat",
