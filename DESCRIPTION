@@ -29,4 +29,6 @@ Imports:
     mgcv,
     ranger,
     rbiodatacr
+Remotes:
+    ManuelSpinola/h3sdm
 Encoding: UTF-8

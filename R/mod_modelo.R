@@ -2,7 +2,7 @@
 # mod_modelo.R
 # Módulo interno (sin UI propia):
 #   1. Genera dataset PA con h3sdm
-#   2. Ajusta modelo (RF / XGB / LogReg / GAM)
+#   2. Ajusta modelo (GAM)
 #   3. Predice distribución presente y futura
 #   4. Calcula AOA presente y futuro
 # OVS-CR · ICOMVIS · UNA
@@ -12,9 +12,7 @@
 mod_modelo_server <- function(id, estado, sidebar_vals) {
   moduleServer(id, function(input, output, session) {
 
-    # ── Disparar flujo cuando los registros están listos ─────
-    # Observa estado$registros_listos (señal explícita) para garantizar
-    # que TODOS los providers terminaron antes de modelar
+    # Disparar flujo cuando los registros están listos
     observeEvent(estado$registros_listos, ignoreNULL = TRUE, ignoreInit = TRUE, {
       req(!is.null(estado$registros_sf))
       req(nrow(estado$registros_sf) > 0)
@@ -39,80 +37,68 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
     return()
   }
 
-
-  withProgress(message = paste("Ajustando modelo para", especie, "…"),
-               detail  = "Preparando datos…", {
+  withProgress(message = paste("Ajustando modelo para", especie, "..."),
+               detail  = "Preparando datos...", {
 
     tryCatch({
 
       # 1. Covariables actuales
-      setProgress(0.1, detail = "Cargando covariables CHELSA…")
+      setProgress(0.1, detail = "Cargando covariables CHELSA...")
       cov_actual <- cargar_covariables(res, "actual")
       if (is.null(cov_actual)) {
         showNotification(
-          paste0("Covariables actuales para resolución ", res, " no disponibles. ",
-                 "Preparálas con h3sdm_extract_num() y guardalas en data/."),
+          paste0("Covariables actuales para resolucion ", res, " no disponibles. ",
+                 "Prepararlas con h3sdm_extract_num() y guardarlas en data/."),
           type = "error", duration = 10)
         return()
       }
 
-      # 2. Dataset PA
-      setProgress(0.2, detail = "Generando presencias/pseudoausencias…")
-      pa <- h3sdm::h3sdm_pa_from_records(
-        records       = sf::st_transform(recs, 5367),
+      cov_dedup <- cov_actual[!duplicated(cov_actual$h3_address), ]
+      vars_df   <- sf::st_drop_geometry(cov_dedup)
+
+      # 2. Hexagonos de presencia
+      setProgress(0.2, detail = "Asignando registros a hexagonos...")
+      pres_sf <- h3sdm::h3sdm_pres_from_sf(
+        records_sf    = sf::st_transform(recs, 5367),
         aoi_sf        = sf::st_transform(h3sdm::cr_outline_c, 5367),
         res           = as.integer(res),
-        n_pseudoabs   = sidebar_vals$n_pseudoabs(),
-        buffer_k      = as.integer(sidebar_vals$buffer_k()),
-        predictors_sf = cov_actual
+        expand_factor = 0.1
       )
 
-      # Unir covariables al PA
-      vars_df  <- sf::st_drop_geometry(cov_actual)
-      vars_df  <- vars_df[!duplicated(vars_df$h3_address), ]
-      pa_joined <- dplyr::left_join(
-        sf::st_drop_geometry(pa), vars_df, by = "h3_address"
-      )
-      pa <- sf::st_sf(pa_joined,
-                      geometry = sf::st_geometry(pa),
-                      crs      = sf::st_crs(pa))
-
-      n_pres <- sum(pa$presence == "1", na.rm = TRUE)
+      n_pres <- nrow(pres_sf)
       if (n_pres < 5) {
         showNotification(
-          paste0("Solo ", n_pres, " presencias — necesitás más registros para modelar."),
+          paste0("Solo ", n_pres, " hexagonos de presencia - necesitas mas registros para modelar."),
           type = "error", duration = 8)
         return()
       }
 
-      # 3. Filtro de outliers ambientales (Mahalanobis en espacio CHELSA)
-      setProgress(0.25, detail = "Filtrando outliers ambientales…")
-      vars_cov <- setdiff(
-        names(sf::st_drop_geometry(pa)),
-        c("h3_address", "presence", "x", "y", "geom")
+      # 3. PA temporal para filtro de outliers
+      setProgress(0.25, detail = "Filtrando outliers ambientales...")
+      pred_sf <- h3sdm::h3sdm_predictors(cov_dedup)
+
+      pa_temp <- h3sdm::h3sdm_pa(
+        pres_sf       = pres_sf[, c("h3_address", "geometry")],
+        predictors_sf = pred_sf,
+        n_pseudoabs   = n_pres,
+        buffer_k      = as.integer(sidebar_vals$buffer_k())
       )
-      vars_cov <- vars_cov[sapply(
-        sf::st_drop_geometry(pa)[, vars_cov, drop = FALSE], is.numeric
-      )]
 
-      filtro <- h3sdm::h3sdm_filter_outliers(pa, vars_cov)
-      pa     <- filtro$pa_clean
+      filtro      <- h3sdm::h3sdm_filter_outliers(
+        h3sdm::h3sdm_data(pa_temp, pred_sf)
+      )
+      n_pres_post <- sum(filtro$pa_clean$presence == "1", na.rm = TRUE)
 
-      n_pres_post <- sum(pa$presence == "1", na.rm = TRUE)
-
-      # Guardar en estado para visualización permanente
+      # Guardar en estado para visualizacion permanente
       estado$n_registros_modelo <- n_pres_post
       estado$n_removidos        <- filtro$n_removed
-      estado$n_hex_pres         <- n_pres_post
-      estado$n_hex_aus          <- sum(pa$presence == "0", na.rm = TRUE)
-
       if (filtro$n_removed > 0) {
         showNotification(
           paste0(
             "\u26a0\ufe0f ", filtro$n_removed,
-            " registro(s) eliminado(s) como outlier(s) ambiental(es) ",
+            " hexagono(s) eliminado(s) como outlier(s) ambiental(es) ",
             "(D^2 > ", round(filtro$threshold_d2, 1), "). ",
-            "Se usaron ", n_pres_post, " hexágonos de presencia para el modelo."
+            "Se usaron ", n_pres_post, " hexagonos de presencia para el modelo."
           ),
           type = "warning", duration = 8
         )
@@ -121,24 +107,36 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       if (n_pres_post < 5) {
         showNotification(
           paste0("Tras el filtro ambiental quedaron solo ", n_pres_post,
-                 " presencias — no es posible ajustar el modelo. ",
-                 "Intentá con una especie con más registros."),
+                 " presencias - no es posible ajustar el modelo. ",
+                 "Intenta con una especie con mas registros."),
           type = "error", duration = 10)
         return()
       }
 
-      # 4. Preparar datos para h3sdm
-      setProgress(0.3, detail = "Construyendo dataset de modelado…")
-      cov_dedup <- cov_actual[!duplicated(cov_actual$h3_address), ]
-      pred_sf   <- h3sdm::h3sdm_predictors(cov_dedup)
-      pa_base   <- pa[!duplicated(pa$h3_address), c("h3_address", "presence")]
-      dat       <- h3sdm::h3sdm_data(pa_base, pred_sf)
+      # 4. PA final balanceado 1:1
+      setProgress(0.3, detail = "Generando pseudoausencias balanceadas 1:1...")
+      pres_clean <- filtro$pa_clean[filtro$pa_clean$presence == "1",
+                                    c("h3_address", "geometry")]
+
+      pa <- h3sdm::h3sdm_pa(
+        pres_sf       = pres_clean,
+        predictors_sf = pred_sf,
+        n_pseudoabs   = n_pres_post,
+        buffer_k      = as.integer(sidebar_vals$buffer_k())
+      )
+
+      estado$n_hex_pres <- n_pres_post
+      estado$n_hex_aus  <- sum(pa$presence == "0", na.rm = TRUE)
+
+      # 5. Construir dataset de modelado
+      pa_base <- pa[!duplicated(pa$h3_address), c("h3_address", "presence")]
+      dat     <- h3sdm::h3sdm_data(pa_base, pred_sf)
       estado$dat_rv <- dat
 
       presence_data <- dat |> dplyr::filter(presence == "1")
 
-      # 5. Recipe
-      setProgress(0.4, detail = paste("Configurando", toupper(alg), "…"))
+      # 6. Recipe
+      setProgress(0.4, detail = paste("Configurando", toupper(alg), "..."))
       if (alg == "gam") {
         rec <- h3sdm::h3sdm_recipe_gam(dat, response_col = "presence")
       } else {
@@ -146,7 +144,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
         rec <- recipes::step_normalize(rec, recipes::all_numeric_predictors())
       }
 
-      # 5. Especificación del modelo
+      # 7. Especificacion del modelo
       model_spec <- switch(alg,
         rf = parsnip::rand_forest(trees = 500) |>
                parsnip::set_engine("ranger") |>
@@ -162,7 +160,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
                 parsnip::set_mode("classification")
       )
 
-      # 6. Workflow
+      # 8. Workflow
       if (alg == "gam") {
         df_dat   <- sf::st_drop_geometry(dat)
         vars_dat <- setdiff(names(df_dat), c("h3_address", "presence", "x", "y"))
@@ -181,10 +179,10 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
         wf <- h3sdm::h3sdm_workflow(model_spec = model_spec, recipe = rec)
       }
 
-      # 7. CV espacial
-      setProgress(0.5, detail = "Validación cruzada espacial…")
-      dat_valid  <- sf::st_make_valid(dat)
-      cv_split   <- h3sdm::h3sdm_spatial_cv(
+      # 9. CV espacial
+      setProgress(0.5, detail = "Validacion cruzada espacial...")
+      dat_valid <- sf::st_make_valid(dat)
+      cv_split  <- h3sdm::h3sdm_spatial_cv(
         data     = dat_valid,
         method   = "block",
         v        = 5,
@@ -194,8 +192,8 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       )
       estado$cv_split_rv <- cv_split
 
-      # 8. Ajustar
-      setProgress(0.6, detail = "Ajustando modelo…")
+      # 10. Ajustar
+      setProgress(0.6, detail = "Ajustando modelo...")
       fitted <- h3sdm::h3sdm_fit_model(
         workflow      = wf,
         data_split    = cv_split,
@@ -206,25 +204,25 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       estado$resolucion      <- res
 
       showNotification(
-        paste0("Modelo ", toupper(alg), " ajustado — ", n_pres_post, " hexágonos de presencia."),
+        paste0("Modelo ", toupper(alg), " ajustado — ", n_pres_post,
+               " hexagonos de presencia · ", estado$n_hex_aus, " pseudoausencias."),
         type = "message", duration = 4)
 
-      # 9. Predicción presente
-      setProgress(0.7, detail = "Generando mapa de distribución presente…")
+      # 11. Prediccion presente
+      setProgress(0.7, detail = "Generando mapa de distribucion presente...")
       pred_presente <- h3sdm::h3sdm_predict(fitted, pred_sf)
       estado$prediccion_sf <- pred_presente
 
-      # 10. Predicción futura (si hay covariables)
+      # 12. Prediccion futura (si hay covariables)
       cov_futuro <- cargar_covariables(res, "futuro")
       if (!is.null(cov_futuro)) {
-        setProgress(0.8, detail = "Generando mapa de distribución futura…")
+        setProgress(0.8, detail = "Generando mapa de distribucion futura...")
         cov_fut_dedup <- cov_futuro[!duplicated(cov_futuro$h3_address), ]
 
-        # Alinear columnas del futuro con las del presente
-        # (el futuro ya viene filtrado, pero verificamos por seguridad)
-        vars_presente <- names(sf::st_drop_geometry(cov_dedup))
-        vars_futuro   <- names(sf::st_drop_geometry(cov_fut_dedup))
+        vars_presente  <- names(sf::st_drop_geometry(cov_dedup))
+        vars_futuro    <- names(sf::st_drop_geometry(cov_fut_dedup))
         vars_faltantes <- setdiff(vars_presente, vars_futuro)
+
         if (length(vars_faltantes) > 0) {
           showNotification(
             paste0("Variables faltantes en covariables futuras: ",
@@ -232,7 +230,6 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
             type = "error", duration = 10)
           estado$pred_futuro_sf <- NULL
         } else {
-          # Quedarse solo con las columnas del presente + geometría
           cols_keep     <- c(vars_presente[vars_presente %in% vars_futuro], "geom")
           cols_keep     <- intersect(cols_keep, names(cov_fut_dedup))
           cov_fut_dedup <- cov_fut_dedup[, cols_keep]
@@ -245,12 +242,12 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
         estado$pred_futuro_sf <- NULL
         showNotification(
           paste0("Covariables futuras res-", res, " no disponibles. ",
-                 "Solo se genera la distribución presente."),
+                 "Solo se genera la distribucion presente."),
           type = "warning", duration = 6)
       }
 
-      # 11. AOA presente
-      setProgress(0.85, detail = "Calculando AOA presente…")
+      # 13. AOA presente
+      setProgress(0.85, detail = "Calculando AOA presente...")
       aoa_result <- h3sdm::h3sdm_aoa(
         newdata    = pred_presente,
         train      = dat,
@@ -263,9 +260,9 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
         )
       estado$aoa_sf <- aoa_result
 
-      # 12. AOA futuro (si hay predicción futura)
+      # 14. AOA futuro (si hay prediccion futura)
       if (!is.null(estado$pred_futuro_sf)) {
-        setProgress(0.95, detail = "Calculando AOA futuro…")
+        setProgress(0.95, detail = "Calculando AOA futuro...")
         tryCatch({
           aoa_futuro <- h3sdm::h3sdm_aoa(
             newdata    = estado$pred_futuro_sf,

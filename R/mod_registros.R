@@ -154,15 +154,11 @@ mod_registros_server <- function(id, estado, sidebar_vals) {
             if (!is.null(estado$n_removidos) && estado$n_removidos > 0)
               div(class = "text-muted mt-1",
                   bs_icon("exclamation-triangle", class = "me-1"),
-                  estado$n_removidos, " removidos como outliers ambientales")
-          )
-        },
-        if (!is.null(estado$n_hex_pres)) {
-          div(
-            class = "alert alert-secondary small py-2 px-3 mb-0",
-            bs_icon("hexagon-fill", class = "me-1"),
-            strong(estado$n_hex_pres), " presencia · ",
-            strong(estado$n_hex_aus), " pseudo-ausencia"
+                  estado$n_removidos, " hexágonos removidos como outliers ambientales"),
+            div(class = "text-muted mt-1",
+                bs_icon("hexagon-fill", class = "me-1"),
+                strong(estado$n_registros_modelo), " presencias · ",
+                strong(estado$n_registros_modelo), " pseudo-ausencias (1:1)")
           )
         }
       )
@@ -174,14 +170,18 @@ mod_registros_server <- function(id, estado, sidebar_vals) {
       if (is.null(recs) || !"provider" %in% names(recs)) return(NULL)
       df <- as.data.frame(table(sf::st_drop_geometry(recs)$provider))
       names(df) <- c("Fuente", "Registros")
-      tags$table(
-        class = "table table-sm small mb-0",
-        tags$thead(
-          style = "background:#a31e32; color:#fff;",
-          tags$tr(lapply(names(df), tags$th))
-        ),
-        tags$tbody(
-          apply(df, 1, function(r) tags$tr(lapply(r, tags$td)))
+      tagList(
+        p(class = "small text-muted mb-1",
+          "Luego de eliminar duplicados por coordenada exacta."),
+        tags$table(
+          class = "table table-sm small mb-0",
+          tags$thead(
+            style = "background:#a31e32; color:#fff;",
+            tags$tr(lapply(names(df), tags$th))
+          ),
+          tags$tbody(
+            apply(df, 1, function(r) tags$tr(lapply(r, tags$td)))
+          )
         )
       )
     })

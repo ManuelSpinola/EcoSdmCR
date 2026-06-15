@@ -2768,6 +2768,46 @@
       "Maintainer": "Hadley Wickham <hadley@posit.co>",
       "Repository": "CRAN"
     },
+    "exactextractr": {
+      "Package": "exactextractr",
+      "Version": "0.10.1",
+      "Source": "Repository",
+      "Title": "Fast Extraction from Raster Datasets using Polygons",
+      "Authors@R": "c( person(\"Daniel\", \"Baston\", email = \"dbaston@isciences.com\", role = c(\"aut\", \"cre\")), person(\"ISciences, LLC\", role=\"cph\"))",
+      "Description": "Quickly and accurately summarizes raster values over polygonal areas (\"zonal statistics\").",
+      "Depends": [
+        "R (>= 3.4.0)"
+      ],
+      "License": "Apache License (== 2.0)",
+      "SystemRequirements": "GEOS (>= 3.5.0)",
+      "Imports": [
+        "Rcpp (>= 0.12.12)",
+        "methods",
+        "raster",
+        "sf (>= 0.9.0)"
+      ],
+      "URL": "https://isciences.gitlab.io/exactextractr/, https://github.com/isciences/exactextractr",
+      "BugReports": "https://github.com/isciences/exactextractr/issues",
+      "LinkingTo": [
+        "Rcpp"
+      ],
+      "Suggests": [
+        "dplyr",
+        "foreign",
+        "knitr",
+        "ncdf4",
+        "rmarkdown",
+        "testthat",
+        "terra (>= 1.5.17)"
+      ],
+      "Encoding": "UTF-8",
+      "RoxygenNote": "7.3.2",
+      "VignetteBuilder": "knitr",
+      "NeedsCompilation": "yes",
+      "Author": "Daniel Baston [aut, cre], ISciences, LLC [cph]",
+      "Maintainer": "Daniel Baston <dbaston@isciences.com>",
+      "Repository": "CRAN"
+    },
     "farver": {
       "Package": "farver",
       "Version": "2.1.2",
@@ -3749,7 +3789,7 @@
     },
     "h3sdm": {
       "Package": "h3sdm",
-      "Version": "0.1.5",
+      "Version": "0.1.6",
       "Source": "GitHub",
       "Type": "Package",
       "Title": "Species Distribution Modeling with H3 Grids",
@@ -3780,7 +3820,15 @@
         "yardstick",
         "ecospat",
         "DALEX",
-        "stacks"
+        "stacks",
+        "h3jsr",
+        "landscapemetrics",
+        "rbiodatacr",
+        "spocc",
+        "vip",
+        "exactextractr",
+        "tidyr",
+        "cli"
       ],
       "Suggests": [
         "ggplot2",
@@ -3788,15 +3836,10 @@
         "knitr",
         "rmarkdown",
         "here",
-        "tidyr",
         "themis",
         "DALEXtra",
         "ingredients",
-        "exactextractr",
-        "landscapemetrics",
-        "h3jsr",
         "tidyterra",
-        "spocc",
         "tidymodels",
         "workflowsets",
         "ranger",
@@ -3804,10 +3847,7 @@
         "ggbrick",
         "parsnip",
         "tidyverse",
-        "rbiodatacr",
-        "vip",
-        "DALEXtra",
-        "tidytemplate"
+        "geodata"
       ],
       "VignetteBuilder": "knitr",
       "LazyData": "true",
@@ -3816,11 +3856,11 @@
       "Author": "Manuel Spínola [aut, cre]",
       "Maintainer": "Manuel Spínola <mspinola10@gmail.com>",
       "RemoteType": "github",
+      "RemoteHost": "api.github.com",
       "RemoteUsername": "ManuelSpinola",
       "RemoteRepo": "h3sdm",
       "RemoteRef": "main",
-      "RemoteSha": "73284c4ff1fbe5bb7f0e0cb07f6a28727f242d54",
-      "RemoteHost": "api.github.com"
+      "RemoteSha": "3a971b010d332b90289f4725b81ece9b1381419e"
     },
     "hardhat": {
       "Package": "hardhat",
@@ -4882,6 +4922,57 @@
         "stats",
         "graphics"
       ],
+      "Repository": "CRAN"
+    },
+    "landscapemetrics": {
+      "Package": "landscapemetrics",
+      "Version": "2.2.1",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Landscape Metrics for Categorical Map Patterns",
+      "Authors@R": "c(person(\"Maximilian H.K.\", \"Hesselbarth\", role = c(\"aut\", \"cre\"), email = \"mhk.hesselbarth@gmail.com\", comment = c(ORCID = \"0000-0003-1125-9918\")), person(\"Marco\", \"Sciaini\", role = \"aut\", email = \"sciaini.marco@gmail.com\", comment = c(ORCID = \"0000-0002-3042-5435\")), person(\"Jakub\", \"Nowosad\",  role = \"aut\", email = \"nowosad.jakub@gmail.com\",  comment = c(ORCID = \"0000-0002-1057-3721\")), person(\"Sebastian\", \"Hanss\",  role = \"aut\",  comment = c(ORCID = \"0000-0002-3990-4897\")), person(\"Laura J.\", \"Graham\", role = \"ctb\",  comment = \"Input on package structure\"), person(\"Jeffrey\", \"Hollister\",  role = \"ctb\",  comment = \"Input on package structure\"), person(\"Kimberly A.\", \"With\",  role = \"ctb\", comment = \"Input on package structure\"), person(\"Florian\", \"Privé\",  role = \"ctb\",  comment = \"Original author of underlying C++ code for get_nearestneighbour() function\"), person(\"Project Nayuki\",  role = \"ctb\",  comment = \"Original author of underlying C++ code for get_circumscribingcircle and lsm_p_circle\"), person(\"Matt\", \"Strimas-Mackey\",  role = \"ctb\",  comment = \"Bugfix in sample_metrics()\") )",
+      "Maintainer": "Maximilian H.K. Hesselbarth <mhk.hesselbarth@gmail.com>",
+      "Description": "Calculates landscape metrics for categorical landscape patterns in  a tidy workflow. 'landscapemetrics' reimplements the most common metrics from 'FRAGSTATS' (<https://www.fragstats.org/>) and new ones from the current  literature on landscape metrics. This package supports 'terra' SpatRaster objects  as input arguments. It further provides utility functions to visualize patches,  select metrics and building blocks to develop new metrics.",
+      "License": "GPL-3",
+      "URL": "https://r-spatialecology.github.io/landscapemetrics/",
+      "BugReports": "https://github.com/r-spatialecology/landscapemetrics/issues",
+      "Depends": [
+        "R (>= 3.6)"
+      ],
+      "Imports": [
+        "cli",
+        "ggplot2",
+        "methods",
+        "Rcpp (>= 0.11.0)",
+        "stats",
+        "terra",
+        "tibble"
+      ],
+      "Suggests": [
+        "covr",
+        "dplyr",
+        "knitr",
+        "raster",
+        "rmarkdown",
+        "sf",
+        "sp",
+        "stars",
+        "stringr",
+        "testthat",
+        "tidyr"
+      ],
+      "LinkingTo": [
+        "Rcpp",
+        "RcppArmadillo"
+      ],
+      "ByteCompile": "true",
+      "Encoding": "UTF-8",
+      "LazyData": "true",
+      "Config/testthat/edition": "3",
+      "RoxygenNote": "7.3.2",
+      "VignetteBuilder": "knitr",
+      "NeedsCompilation": "yes",
+      "Author": "Maximilian H.K. Hesselbarth [aut, cre] (<https://orcid.org/0000-0003-1125-9918>), Marco Sciaini [aut] (<https://orcid.org/0000-0002-3042-5435>), Jakub Nowosad [aut] (<https://orcid.org/0000-0002-1057-3721>), Sebastian Hanss [aut] (<https://orcid.org/0000-0002-3990-4897>), Laura J. Graham [ctb] (Input on package structure), Jeffrey Hollister [ctb] (Input on package structure), Kimberly A. With [ctb] (Input on package structure), Florian Privé [ctb] (Original author of underlying C++ code for get_nearestneighbour() function), Project Nayuki [ctb] (Original author of underlying C++ code for get_circumscribingcircle and lsm_p_circle), Matt Strimas-Mackey [ctb] (Bugfix in sample_metrics())",
       "Repository": "CRAN"
     },
     "later": {
@@ -9578,6 +9669,80 @@
       "Maintainer": "Jari Oksanen <jhoksane@gmail.com>",
       "Repository": "RSPM",
       "Encoding": "UTF-8"
+    },
+    "vip": {
+      "Package": "vip",
+      "Version": "0.4.6",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Variable Importance Plots",
+      "Authors@R": "c( person(c(\"Brandon\", \"M.\"), family = \"Greenwell\",  email = \"greenwell.brandon@gmail.com\", role = c(\"aut\", \"cre\"),  comment = c(ORCID = \"0000-0002-8120-0084\")), person(\"Brad\", \"Boehmke\", email = \"bradleyboehmke@gmail.com\", role = c(\"aut\"), comment = c(ORCID = \"0000-0002-3611-8516\")) )",
+      "Description": "A general framework for constructing variable importance plots from  various types of machine learning models in R. Aside from some standard model- specific variable importance measures, this package also provides model- agnostic approaches that can be applied to any supervised learning algorithm. These include 1) an efficient permutation-based variable importance measure,  2) variable importance based on Shapley values (Strumbelj and Kononenko,  2014) <doi:10.1007/s10115-013-0679-x>, and 3) the variance-based  approach described in Greenwell et al. (2018) <doi:10.48550/arXiv.1805.04755>. A  variance-based method for quantifying the relative strength of interaction  effects is also included (see the previous reference for details).",
+      "License": "GPL (>= 2)",
+      "URL": "https://github.com/koalaverse/vip/, https://koalaverse.github.io/vip/",
+      "BugReports": "https://github.com/koalaverse/vip/issues",
+      "Encoding": "UTF-8",
+      "VignetteBuilder": "knitr",
+      "Depends": [
+        "R (>= 4.1.0)"
+      ],
+      "Imports": [
+        "foreach",
+        "ggplot2 (>= 0.9.0)",
+        "stats",
+        "tibble",
+        "utils",
+        "yardstick"
+      ],
+      "Suggests": [
+        "bookdown",
+        "DT",
+        "covr",
+        "doParallel",
+        "dplyr",
+        "fastshap (>= 0.1.0)",
+        "knitr",
+        "lattice",
+        "mlbench",
+        "modeldata",
+        "NeuralNetTools",
+        "pdp",
+        "rmarkdown",
+        "tinytest (>= 1.4.3)",
+        "varImp"
+      ],
+      "Enhances": [
+        "C50",
+        "caret",
+        "Cubist",
+        "earth",
+        "gbm",
+        "glmnet",
+        "h2o",
+        "lightgbm",
+        "mixOmics",
+        "mlr",
+        "mlr3",
+        "neuralnet",
+        "nnet",
+        "parsnip (>= 0.1.7)",
+        "party",
+        "partykit",
+        "pls",
+        "randomForest",
+        "ranger",
+        "rpart",
+        "RSNNS",
+        "sparklyr (>= 0.8.0)",
+        "tidymodels",
+        "workflows (>= 0.2.3)",
+        "xgboost (>= 3.2.0)"
+      ],
+      "RoxygenNote": "7.3.3",
+      "NeedsCompilation": "no",
+      "Author": "Brandon M. Greenwell [aut, cre] (ORCID: <https://orcid.org/0000-0002-8120-0084>), Brad Boehmke [aut] (ORCID: <https://orcid.org/0000-0002-3611-8516>)",
+      "Maintainer": "Brandon M. Greenwell <greenwell.brandon@gmail.com>",
+      "Repository": "CRAN"
     },
     "viridisLite": {
       "Package": "viridisLite",
