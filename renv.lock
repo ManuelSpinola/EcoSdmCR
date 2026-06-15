@@ -3859,7 +3859,7 @@
       "RemoteHost": "api.github.com",
       "RemoteUsername": "ManuelSpinola",
       "RemoteRepo": "h3sdm",
-      "RemoteRef": "v0.1.6",
+      "RemoteRef": "release-0.1.6",
       "RemoteSha": "3a971b010d332b90289f4725b81ece9b1381419e"
     },
     "hardhat": {
