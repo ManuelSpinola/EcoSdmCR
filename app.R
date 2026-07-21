@@ -33,7 +33,7 @@ ui <- page_navbar(
   ),
   theme    = tema_app,
   fillable = TRUE,
-  header   = tagList(useShinyjs(), waiter::use_waiter()),
+  header   = useShinyjs(),
   footer   = div(
     style = paste0(
       "background-color:#a31e32; color:#ffffff; ",
@@ -89,6 +89,7 @@ ui <- page_navbar(
                           "Confiabilidad futura"),
           mod_mapas_ui("mapas_aoa_futuro", tipo = "aoa_futuro")
         ),
+        
 
         nav_panel(
           title = tagList(bs_icon("bar-chart", class = "me-1"),

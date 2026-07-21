@@ -37,30 +37,13 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
     return()
   }
 
-  w <- waiter::Waiter$new(
-    html = shiny::tagList(
-      waiter::spin_fading_circles(),
-      shiny::h4(paste("Ajustando modelo para", especie, "..."),
-                style = "color:#fff;"),
-      shiny::p("Preparando datos...", style = "color:#fff;")
-    ),
-    color = waiter::transparent(0.7)
-  )
-  w$show()
-  on.exit(w$hide(), add = TRUE)
+  withProgress(message = paste("Ajustando modelo para", especie, "..."),
+               detail  = "Preparando datos...", {
 
-  actualizar_detalle <- function(txt) {
-    w$update(html = shiny::tagList(
-      waiter::spin_fading_circles(),
-      shiny::h4(paste("Ajustando modelo para", especie, "..."), style = "color:#fff;"),
-      shiny::p(txt, style = "color:#fff;")
-    ))
-  }
-
-  tryCatch({
+    tryCatch({
 
       # 1. Covariables actuales
-      actualizar_detalle("Cargando covariables CHELSA...")
+      setProgress(0.1, detail = "Cargando covariables CHELSA...")
       cov_actual <- cargar_covariables(res, "actual")
       if (is.null(cov_actual)) {
         showNotification(
@@ -74,7 +57,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       vars_df   <- sf::st_drop_geometry(cov_dedup)
 
       # 2. Hexagonos de presencia
-      actualizar_detalle("Asignando registros a hexagonos...")
+      setProgress(0.2, detail = "Asignando registros a hexagonos...")
       pres_sf <- h3sdm::h3sdm_pres_from_sf(
         records_sf    = sf::st_transform(recs, 5367),
         aoi_sf        = sf::st_transform(h3sdm::cr_outline_c, 5367),
@@ -91,7 +74,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       }
 
       # 3. PA temporal para filtro de outliers
-      actualizar_detalle("Filtrando outliers ambientales...")
+      setProgress(0.25, detail = "Filtrando outliers ambientales...")
       pred_sf <- h3sdm::h3sdm_predictors(cov_dedup)
 
       pa_temp <- h3sdm::h3sdm_pa(
@@ -131,7 +114,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       }
 
       # 4. PA final balanceado 1:1
-      actualizar_detalle("Generando pseudoausencias balanceadas 1:1...")
+      setProgress(0.3, detail = "Generando pseudoausencias balanceadas 1:1...")
       pres_clean <- filtro$pa_clean[filtro$pa_clean$presence == "1",
                                     c("h3_address", "geometry")]
 
@@ -153,7 +136,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       presence_data <- dat |> dplyr::filter(presence == "1")
 
       # 6. Recipe
-      actualizar_detalle(paste("Configurando", toupper(alg), "..."))
+      setProgress(0.4, detail = paste("Configurando", toupper(alg), "..."))
       if (alg == "gam") {
         rec <- h3sdm::h3sdm_recipe_gam(dat, response_col = "presence")
       } else {
@@ -197,7 +180,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       }
 
       # 9. CV espacial
-      actualizar_detalle("Validacion cruzada espacial...")
+      setProgress(0.5, detail = "Validacion cruzada espacial...")
       dat_valid <- sf::st_make_valid(dat)
       cv_split  <- h3sdm::h3sdm_spatial_cv(
         data     = dat_valid,
@@ -210,7 +193,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       estado$cv_split_rv <- cv_split
 
       # 10. Ajustar
-      actualizar_detalle("Ajustando modelo...")
+      setProgress(0.6, detail = "Ajustando modelo...")
       fitted <- h3sdm::h3sdm_fit_model(
         workflow      = wf,
         data_split    = cv_split,
@@ -226,14 +209,14 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
         type = "message", duration = 4)
 
       # 11. Prediccion presente
-      actualizar_detalle("Generando mapa de distribucion presente...")
+      setProgress(0.7, detail = "Generando mapa de distribucion presente...")
       pred_presente <- h3sdm::h3sdm_predict(fitted, pred_sf)
       estado$prediccion_sf <- pred_presente
 
       # 12. Prediccion futura (si hay covariables)
       cov_futuro <- cargar_covariables(res, "futuro")
       if (!is.null(cov_futuro)) {
-        actualizar_detalle("Generando mapa de distribucion futura...")
+        setProgress(0.8, detail = "Generando mapa de distribucion futura...")
         cov_fut_dedup <- cov_futuro[!duplicated(cov_futuro$h3_address), ]
 
         vars_presente  <- names(sf::st_drop_geometry(cov_dedup))
@@ -264,7 +247,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
       }
 
       # 13. AOA presente
-      actualizar_detalle("Calculando AOA presente...")
+      setProgress(0.85, detail = "Calculando AOA presente...")
       aoa_result <- h3sdm::h3sdm_aoa(
         newdata    = pred_presente,
         train      = dat,
@@ -279,7 +262,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
 
       # 14. AOA futuro (si hay prediccion futura)
       if (!is.null(estado$pred_futuro_sf)) {
-        actualizar_detalle("Calculando AOA futuro...")
+        setProgress(0.95, detail = "Calculando AOA futuro...")
         tryCatch({
           aoa_futuro <- h3sdm::h3sdm_aoa(
             newdata    = estado$pred_futuro_sf,
@@ -302,7 +285,7 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
         estado$aoa_futuro_sf <- NULL
       }
 
-      actualizar_detalle("Listo!")
+      setProgress(1.0, detail = "Listo!")
       showNotification("Modelado completo.", type = "message", duration = 5)
 
     }, error = function(e) {
@@ -310,4 +293,5 @@ mod_modelo_server <- function(id, estado, sidebar_vals) {
         paste0("Error durante el modelado: ", conditionMessage(e)),
         type = "error", duration = 12)
     })
+  })
 }
