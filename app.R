@@ -33,7 +33,7 @@ ui <- page_navbar(
   ),
   theme    = tema_app,
   fillable = TRUE,
-  header   = useShinyjs(),
+  header   = tagList(useShinyjs(), waiter::use_waiter()),
   footer   = div(
     style = paste0(
       "background-color:#a31e32; color:#ffffff; ",
