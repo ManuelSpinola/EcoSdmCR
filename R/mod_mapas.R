@@ -17,7 +17,7 @@
 
 .mapa_vacio <- function() {
   leaflet::leaflet() |>
-    leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) |>
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) |>
     leaflet::setView(lng = -84.0, lat = 9.9, zoom = 7)
 }
 
@@ -165,7 +165,7 @@ mod_mapas_server <- function(id, estado, tipo = "presente") {
         bbox <- sf::st_bbox(p_vis)
         pal_cont <- leaflet::colorNumeric("inferno", domain = c(0, 1), reverse = TRUE)
         leaflet::leaflet() |>
-          leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) |>
+          leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) |>
           leafgl::addGlPolygons(data = p_vis, fillColor = ~pal_cont(prediction),
             fillOpacity = 0.85, color = "transparent", weight = 0) |>
           leaflet::addLegend(position = "bottomright", pal = pal_cont,
@@ -181,7 +181,7 @@ mod_mapas_server <- function(id, estado, tipo = "presente") {
         bbox <- sf::st_bbox(p_vis)
         pal_cat <- leaflet::colorFactor(palette = .colores_hab, levels = .etiquetas_hab, ordered = TRUE)
         leaflet::leaflet() |>
-          leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) |>
+          leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) |>
           leafgl::addGlPolygons(data = p_vis, fillColor = ~pal_cat(categoria),
             fillOpacity = 0.85, color = "transparent", weight = 0) |>
           leaflet::addLegend(position = "bottomright", colors = .colores_hab,
@@ -238,7 +238,7 @@ mod_mapas_server <- function(id, estado, tipo = "presente") {
         pal_aoa <- leaflet::colorFactor(palette = c("#d9d9d9", "#2166ac"),
           levels = c(0L, 1L), na.color = "#d9d9d9")
         leaflet::leaflet() |>
-          leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) |>
+          leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) |>
           leafgl::addGlPolygons(data = r_vis, fillColor = ~pal_aoa(AOA),
             fillOpacity = 0.85, color = "transparent", weight = 0) |>
           leaflet::addLegend(position = "bottomright",
@@ -254,7 +254,7 @@ mod_mapas_server <- function(id, estado, tipo = "presente") {
         bbox <- sf::st_bbox(r_vis)
         pal_di <- leaflet::colorNumeric("YlOrRd", domain = r_vis$DI, na.color = "#d9d9d9")
         leaflet::leaflet() |>
-          leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) |>
+          leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) |>
           leafgl::addGlPolygons(data = r_vis, fillColor = ~pal_di(DI),
             fillOpacity = 0.85, color = "transparent", weight = 0) |>
           leaflet::addLegend(position = "bottomright", pal = pal_di,
@@ -270,7 +270,7 @@ mod_mapas_server <- function(id, estado, tipo = "presente") {
         pal_cont <- leaflet::colorNumeric("inferno", domain = c(0, 1),
           reverse = TRUE, na.color = "#d9d9d9")
         leaflet::leaflet() |>
-          leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) |>
+          leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) |>
           leafgl::addGlPolygons(data = r_vis, fillColor = ~pal_cont(prediction_aoa),
             fillOpacity = 0.85, color = "transparent", weight = 0) |>
           leaflet::addLegend(position = "bottomright", pal = pal_cont,
@@ -287,7 +287,7 @@ mod_mapas_server <- function(id, estado, tipo = "presente") {
         pal_cat <- leaflet::colorFactor(palette = .colores_hab, levels = .etiquetas_hab,
           ordered = TRUE, na.color = "#d9d9d9")
         leaflet::leaflet() |>
-          leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) |>
+          leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) |>
           leafgl::addGlPolygons(data = r_vis, fillColor = ~pal_cat(categoria_aoa),
             fillOpacity = 0.85, color = "transparent", weight = 0) |>
           leaflet::addLegend(position = "bottomright",

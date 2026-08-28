@@ -67,7 +67,7 @@ mod_registros_server <- function(id, estado, sidebar_vals) {
     # Mapa base
     output$mapa_registros <- leaflet::renderLeaflet({
       leaflet::leaflet() |>
-        leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron) |>
+        leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) |>
         leaflet::setView(lng = -84.0, lat = 9.9, zoom = 7)
     })
 
